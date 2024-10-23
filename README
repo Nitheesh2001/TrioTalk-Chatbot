@@ -1,0 +1,30 @@
+# TrioTalk Chatbot
+
+Welcome to **TrioTalk**, a versatile chatbot application that combines three interactive chatbots to provide a fun and informative user experience. The chatbots included are:
+
+- **Chit-Chat Bot**: Engage in casual conversations.
+- **Q&A Bot**: Ask questions and receive informative answers.
+- **Weather Bot**: Get up-to-date weather information.
+
+## Features
+
+- **User-Friendly Interface**: Simple and intuitive design for easy navigation.
+- **Multiple Chatbots**: Choose from Chit-Chat, Q&A, or Weather for different interactions.
+- **Chat History**: Keep track of your previous conversations.
+- **Real-time Weather Updates**: Access current weather conditions for any location.
+
+## Technologies Used
+
+- Python
+- Streamlit
+- OpenWeatherMap API (for weather information)
+- Natural Language Processing (NLP) techniques
+
+## Installation
+
+To set up the TrioTalk chatbot application locally, follow these steps:
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/yourusername/trio_talk.git
+   cd trio_talk
