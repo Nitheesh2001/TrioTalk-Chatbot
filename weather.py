@@ -5,6 +5,7 @@ import requests
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import re
 
 # Load environment variables
 load_dotenv()
@@ -12,7 +13,7 @@ load_dotenv()
 # Use your API key from the environment variable
 weather_api_key = os.getenv("WEATHER_API_KEY")
 
-# Initialize chat history and weather data
+# Initialize chat history and weather data if not already set
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 if 'weather_data' not in st.session_state:
@@ -60,55 +61,39 @@ def get_weather(city):
     except Exception as e:
         return f"An unexpected error occurred: {e}"
 
+# Function to extract city name from user input using simple keyword matching
+def extract_city(user_input):
+    # Regular expression to capture place names following 'in' or 'at'
+    match = re.search(r"\b(?:in|at)\s+(\w+)", user_input, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    else:
+        # If no keyword-based match, assume input as direct city name
+        return user_input.strip()
+
 # Streamlit app interface
 def show_weather_page():
     st.title("SkyBuddy")
 
     # Get user input for city
-    user_city = st.text_input("Enter city name for weather:", "")
-    if st.button("Get Weather") and user_city:
-        with st.spinner("Fetching weather data..."):
-            weather_response = get_weather(user_city)
-            # Prepend new message to chat history
-            st.session_state.chat_history.insert(0, ("You", user_city))
-            st.session_state.chat_history.insert(0, ("Bot", weather_response))
-            # Display weather response
-            st.markdown(f"<div style='background-color: #d4edda; border-radius: 10px; padding: 10px; margin-bottom: 10px;'><b style='color: #000000;'>Bot:</b> <span style='color: #000000;'>{weather_response}</span></div>", unsafe_allow_html=True)
+    user_city_input = st.text_input("Enter city name or type your request:", "")
+    if st.button("Get Weather") and user_city_input:
+        city_name = extract_city(user_city_input)
+        if city_name:
+            with st.spinner("Fetching weather data..."):
+                weather_response = get_weather(city_name)
+                # Prepend new message to chat history
+                st.session_state.chat_history.insert(0, ("You", user_city_input))
+                st.session_state.chat_history.insert(0, ("Bot", weather_response))
+                # Display weather response
+                st.markdown(
+                    f"<div style='background-color: #d4edda; border-radius: 10px; padding: 10px; margin-bottom: 10px;'>"
+                    f"<b style='color: #000000;'>Bot:</b> <span style='color: #000000;'>{weather_response}</span></div>",
+                    unsafe_allow_html=True
+                )
+        else:
+            st.error("Please enter a valid city or place name.")
 
-    # Chatbot interaction after getting weather
-    user_message = st.text_input("Ask me anything about the weather:", "")
-    if st.button("Send") and user_message:
-        bot_response = generate_response(user_message)
-        # Prepend new message to chat history
-        st.session_state.chat_history.insert(0, ("You", user_message))
-        st.session_state.chat_history.insert(0, ("Bot", bot_response))
-        # Display bot response
-        st.markdown(f"<div style='background-color: #d4edda; border-radius: 10px; padding: 10px; margin-bottom: 10px;'><b style='color: #000000;'>Bot:</b> <span style='color: #000000;'>{bot_response}</span></div>", unsafe_allow_html=True)
-
-# Function to generate chatbot responses based on weather data
-def generate_response(user_input):
-    # Check if weather data is available
-    if not st.session_state.weather_data:
-        return "Please provide a city name to get the weather first."
-
-    # Extract data from session state
-    temp = st.session_state.weather_data['temp']
-    description = st.session_state.weather_data['description']
-    humidity = st.session_state.weather_data['humidity']
-    wind_speed = st.session_state.weather_data['wind_speed']
-
-    # Simple logic to respond to common questions
-    if "temperature" in user_input.lower() and "average" in user_input.lower():
-        return f"The current temperature is {temp:.2f}°C. I don't have data for the average temperature."
-    elif "temperature" in user_input.lower():
-        return f"The current temperature is {temp:.2f}°C."
-    elif "weather" in user_input.lower():
-        return f"The current weather is {description}."
-    elif "humidity" in user_input.lower():
-        return f"The humidity is {humidity}%."
-    elif "wind" in user_input.lower():
-        return f"The wind speed is {wind_speed} m/s."
-    elif "thank" in user_input.lower():
-        return "You're welcome! Let me know if you need anything else."
-    else:
-        return "I'm not sure about that. Can you ask something else about the weather?"
+# Call the weather page function
+if __name__ == "__main__":
+    show_weather_page()
