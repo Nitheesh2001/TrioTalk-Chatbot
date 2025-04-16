@@ -12,7 +12,7 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Function to load Gemini Pro model and get chat responses
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-1.5-flash")
 chat = model.start_chat(history=[])
 
 def get_gemini_response(message):
